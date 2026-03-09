@@ -136,27 +136,13 @@ Once all runs are complete, the tool will automatically open a highly interactiv
 ## 🎮 Quick Start: Run the Demo
 
 Want to see it in action without configuring your own project? We built a dummy Spring Boot E-Commerce app with 7 intentional sources of flakiness directly into the package.
+
 ```bash
 # One command — starts app, runs tests 3×, opens the HTML report
 npx selenium-flaky-detect --demo
 
-# PowerShell: specify number of runs
-$env:RUNS="5"; npx selenium-flaky-detect --demo
-
-# Bash / macOS / Linux
-RUNS=5 npx selenium-flaky-detect --demo
-```
-
-### 🔌 Use With Your Own Project
-```bash
-# Install globally
-npm install -g selenium-flaky-detector
-
-# Run against your Maven project
-selenium-flaky-detect --project ./my-java-project --runs 3
-
-# With CI gate (fails if health score < threshold)
-selenium-flaky-detect --project . --runs 5 --threshold 80
+# Specify exactly how many runs you want the demo to perform
+npx selenium-flaky-detect --demo --runs 5
 ```
 
 ---
