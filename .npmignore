@@ -1,0 +1,11 @@
+node_modules/
+demo-app/target/
+target/
+flaky-report/
+*.log
+.git/
+.gitignore
+.env
+.DS_Store
+Thumbs.db
+selenium-flaky-detector-*.tgz

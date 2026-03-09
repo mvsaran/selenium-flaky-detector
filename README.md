@@ -369,8 +369,8 @@ selenium-flaky-detector/
 ╠══════════════════════════════════════════════════════════════════╣
 ║  💯  Suite Health Score     ██████████████░░░░  68 / 100         ║
 ║  🔥  Pass/Fail Heatmap      [Run 1][Run 2][Run 3][Run 4][Run 5]  ║
-║  💡  Smart Recommendations  7 actionable fixes found             ║
-║  🏷️  Root Cause Labels      ⏱Timeout · ♻Stale · ⚡Async        ║
+║  💡  Precision Recommendations  7 recommendations found      ║
+║  🏷️  Root Cause Labels      ⏱Timeout · ♻Stale · ❌Assert     ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
@@ -378,7 +378,7 @@ selenium-flaky-detector/
 |---|---|
 | 💯 Suite Health Score | Overall reliability index from 0–100 (animated ring) |
 | 🔥 Pass/Fail Heatmap | Visual grid — ✓/✗ per test per run |
-| 💡 Smart Recommendations | Specific, actionable Java/Selenium fix snippets |
+| 💡 Precision Recommendations | Specific, actionable Java/Selenium fix snippets |
 | 🏷️ Root Cause Labels | Auto-tags: StaleElement, Timeout, NoSuchElement, etc. |
 | 🚦 CI Trust Gate | Hard pass/fail with configurable threshold |
 
