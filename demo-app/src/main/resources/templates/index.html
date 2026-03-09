@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopFlake · E-Commerce Demo</title>
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --border: #334155;
+      --accent: #6366f1; --success: #10b981; --danger: #ef4444;
+      --text: #f1f5f9; --dim: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    nav {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 24px; display: flex; align-items: center; height: 60px; gap: 32px;
+    }
+    nav .brand { font-weight: 800; font-size: 20px; color: var(--accent); }
+    nav a { color: var(--dim); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    nav a:hover { color: var(--text); }
+    nav .cart-badge {
+      background: var(--accent); color: white; border-radius: 100px;
+      padding: 2px 10px; font-size: 12px; font-weight: 700; margin-left: auto;
+    }
+    .hero {
+      text-align: center; padding: 64px 24px 40px;
+      background: linear-gradient(180deg, rgba(99,102,241,0.08) 0%, transparent 100%);
+    }
+    .hero h1 { font-size: 40px; font-weight: 800; margin-bottom: 12px; }
+    .hero p { color: var(--dim); font-size: 16px; }
+    .flaky-badge {
+      display: inline-block; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger); font-size: 12px; padding: 4px 12px; border-radius: 100px;
+      font-weight: 600; margin-top: 12px;
+    }
+    main { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+    .filter-bar {
+      display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; align-items: center;
+    }
+    .filter-bar input {
+      flex: 1; min-width: 200px; background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 16px; border-radius: 8px; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .filter-bar input:focus { border-color: var(--accent); }
+    .filter-btn {
+      background: var(--accent); color: white; border: none; padding: 10px 20px;
+      border-radius: 8px; cursor: pointer; font-weight: 600; transition: opacity 0.2s;
+    }
+    .filter-btn:hover { opacity: 0.85; }
+
+    /* Products Grid */
+    #product-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;
+    }
+    .product-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; transition: transform 0.2s, border-color 0.2s; cursor: pointer;
+    }
+    .product-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .product-img {
+      width: 100%; height: 140px; border-radius: 8px; display: flex;
+      align-items: center; justify-content: center; font-size: 48px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+      margin-bottom: 14px;
+    }
+    .product-name { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+    .product-price { color: var(--accent); font-weight: 700; font-size: 18px; }
+    .product-rating { color: #fbbf24; font-size: 13px; margin-top: 4px; }
+    .stock-badge {
+      font-size: 11px; padding: 3px 8px; border-radius: 6px; margin-top: 8px;
+      display: inline-block;
+    }
+    .in-stock  { background: rgba(16,185,129,0.15); color: var(--success); }
+    .out-stock { background: rgba(239,68,68,0.15);  color: var(--danger); }
+    .add-btn {
+      width: 100%; margin-top: 12px; background: var(--accent); color: white;
+      border: none; padding: 8px; border-radius: 8px; cursor: pointer;
+      font-weight: 600; transition: opacity 0.2s;
+    }
+    .add-btn:hover { opacity: 0.85; }
+    .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Loading state */
+    #loading {
+      text-align: center; padding: 60px; color: var(--dim);
+      display: none; font-size: 18px;
+    }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid rgba(99,102,241,0.2);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status bar */
+    #status-bar {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 16px; margin-bottom: 20px; font-size: 13px; color: var(--dim);
+    }
+
+    /* Flash deal banner */
+    #deal-banner {
+      background: linear-gradient(90deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+      border: 1px solid rgba(99,102,241,0.3); border-radius: 12px;
+      padding: 16px 24px; margin-bottom: 24px; display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    #deal-banner.active { display: flex; align-items: center; gap: 16px; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform:none; } }
+    #deal-timer { font-size: 24px; font-weight: 800; color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">🛒 ShopFlake</span>
+  <a href="/">Products</a>
+  <a href="/cart">Cart</a>
+  <a href="/deals">⚡ Deals</a>
+  <span class="cart-badge" id="nav-cart-count">0</span>
+</nav>
+
+<div class="hero">
+  <h1>🛒 ShopFlake Store</h1>
+  <p>Selenium Flaky Detector · Demo E-Commerce App</p>
+  <span class="flaky-badge">⚠️ Intentional Flakiness Sources Active</span>
+</div>
+
+<main>
+  <!-- Status bar -->
+  <div id="status-bar" aria-live="polite">Loading products…</div>
+
+  <!-- Flash deal banner (appears randomly) -->
+  <div id="deal-banner">
+    <div>
+      <div style="font-size:13px;color:var(--dim);font-weight:600">⚡ FLASH DEAL</div>
+      <div id="deal-title" style="font-size:16px;font-weight:700">Loading…</div>
+    </div>
+    <div id="deal-timer">—</div>
+    <div style="margin-left:auto">
+      <button class="filter-btn" onclick="addFlashDealToCart()">Grab Deal →</button>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input type="text" id="search-input" placeholder="Search products…" aria-label="Search products"/>
+    <button class="filter-btn" onclick="loadProducts()" id="reload-btn">Reload</button>
+  </div>
+
+  <!-- Loading spinner -->
+  <div id="loading">
+    <div class="spinner"></div>
+    Loading products…
+  </div>
+
+  <!-- Product grid -->
+  <div id="product-grid"></div>
+</main>
+
+<script>
+  const BASE = '';
+  let cartCount = 0;
+
+  // ─── Load products (triggers async flakiness) ─────────────────────────
+  async function loadProducts() {
+    showLoading(true);
+    setStatus('Fetching products from API…');
+
+    try {
+      const res = await fetch(BASE + '/api/products');  // ⏱️ Random delay endpoint
+      const products = await res.json();
+      renderProducts(products);
+      setStatus(`Loaded ${products.length} products`);
+    } catch (err) {
+      setStatus('❌ Failed to load products: ' + err.message);
+      document.getElementById('product-grid').innerHTML =
+        '<p style="color:var(--danger);padding:40px">Error loading products. Refresh to retry.</p>';
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function renderProducts(products) {
+    const ICONS = { Electronics:'🎧', Clothing:'👕', Books:'📚', Food:'☕', Sports:'🏃', default:'📦' };
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = products.map(p => `
+      <div class="product-card" id="product-${p.id}" data-testid="product-card" data-id="${p.id}" data-name="${p.name}">
+        <div class="product-img">${ICONS[p.category] || ICONS.default}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-price">$${p.price.toFixed(2)}</div>
+        <div class="product-rating">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5-Math.round(p.rating))} ${p.rating.toFixed(1)}</div>
+        <span class="stock-badge ${p.inStock ? 'in-stock' : 'out-stock'}">${p.inStock ? '✓ In Stock' : '✗ Out of Stock'}</span>
+        <button class="add-btn" id="add-btn-${p.id}"
+          data-testid="add-to-cart-btn"
+          onclick="addToCart(${p.id}, '${p.name}', ${p.price})"
+          ${p.inStock ? '' : 'disabled'}>
+          ${p.inStock ? 'Add to Cart' : 'Out of Stock'}
+        </button>
+      </div>
+    `).join('');
+  }
+
+  // ─── Add to cart (triggers race condition flakiness) ─────────────────
+  async function addToCart(id, name, price) {
+    const btn = document.getElementById('add-btn-' + id);
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+
+    try {
+      const res = await fetch(BASE + '/api/cart/add', {  // ⏱️ Race condition endpoint
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name, price })
+      });
+      const data = await res.json();
+      if (data.success) {
+        cartCount++;
+        document.getElementById('nav-cart-count').textContent = cartCount;
+        if (btn) { btn.textContent = '✓ Added!'; }
+        setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Add to Cart'; } }, 1000);
+      }
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Add to Cart'; }
+    }
+  }
+
+  // ─── Load flash deals (maximally flaky — 50/50) ───────────────────────
+  async function checkDeals() {
+    try {
+      const res = await fetch(BASE + '/api/deals');
+      const data = await res.json();
+      const banner = document.getElementById('deal-banner');
+      if (data.dealAvailable) {
+        document.getElementById('deal-title').textContent = data.dealTitle;
+        document.getElementById('deal-timer').textContent = data.expiresIn ?? '';
+        banner.classList.add('active');
+      } else {
+        banner.classList.remove('active');
+      }
+    } catch (e) {}
+  }
+
+  function addFlashDealToCart() { addToCart(99, 'Flash Deal Item', 49.99); }
+
+  function showLoading(v) { document.getElementById('loading').style.display = v ? 'block' : 'none'; }
+  function setStatus(msg) { document.getElementById('status-bar').textContent = msg; }
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', async (e) => {
+    const q = e.target.value.trim();
+    if (q.length < 2) return;
+    try {
+      const res = await fetch(BASE + '/api/search?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      setStatus(`Search: ${data.count} result(s) for "${q}"`);
+    } catch {}
+  });
+
+  // Init
+  loadProducts();
+  checkDeals();
+  setInterval(checkDeals, 10000);
+</script>
+</body>
+</html>

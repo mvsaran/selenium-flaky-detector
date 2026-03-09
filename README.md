@@ -1,0 +1,444 @@
+# 🔍 selenium-flaky-detector
+
+> **Entropy-Based Flaky Test Detection for Selenium/Java Projects**
+>
+> Detect, score, and fix flaky Selenium tests with a premium interactive dashboard, root-cause analysis, and AI-powered fix recommendations.
+
+[![npm version](https://img.shields.io/npm/v/selenium-flaky-detector?style=flat-square&color=6366f1)](https://www.npmjs.com/package/selenium-flaky-detector)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D14-brightgreen?style=flat-square)](https://nodejs.org)
+[![Java](https://img.shields.io/badge/Java-17%2B-orange?style=flat-square)](https://adoptium.net)
+
+---
+
+## 🧠 What is Entropy-Based Detection?
+
+A **flaky test** is a test that sometimes passes and sometimes fails without any code changes. This is extremely common in Selenium/Java due to async logic, variable network latency, and DOM rendering "race conditions."
+
+Traditional testing tools just tell you: *"Test A Failed"*. But if it failed 1 out of 3 times, how bad is the flakiness?
+
+This detector handles that by using an **Information Theory formula (Entropy)** to calculate a true `Flakiness Percentage` rather than just giving you pass/fail states:
+
+*   **0% Entropy (Total Order):** Tests that *Always Pass* or *Always Fail* are predictable and get a 0% flaky score.
+*   **100% Entropy (Maximum Chaos):** A test that passes exactly 50% of the time is a true coin flip, destroying CI/CD trust, and scores 100%.
+
+By focusing on entropy, we ignore "consistently broken" tests (which are just regular bugs) and surgically spotlight the **truly chaotic timing and network issues**.
+
+---
+
+## 🏗️ Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│  🎭  LAYER 1 · Orchestration & Simulation                            │
+│                                                                      │
+│   ┌──────────────┐      ┌──────────────────┐      ┌──────────────┐  │
+│   │  🛒 ShopFlake │─────▶│ ⚙️  Orchestrator  │─────▶│ ☕  Maven    │  │
+│   │   Demo App   │      │  Engine          │      │   Runner     │  │
+│   │ (Spring Boot)│      │  (run-demo.js)   │      │ (Surefire)   │  │
+│   └──────────────┘      └──────────────────┘      └──────────────┘  │
+└──────────────────────────────────┬───────────────────────────────────┘
+                                   │
+                                   ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  🔁  LAYER 2 · Test Execution Loop                                   │
+│                                                                      │
+│   ┌──────────────┐      ┌──────────────────┐      ┌──────────────┐  │
+│   │ 🔢 Multi-Run  │─────▶│ 📄 Surefire XML  │─────▶│ 💥 Failure   │  │
+│   │   Manager    │      │  Aggregation     │      │   Capture    │  │
+│   │ (N Repeats)  │      │  (JUnit XML)     │      │   Engine     │  │
+│   └──────────────┘      └──────────────────┘      └──────────────┘  │
+└──────────────────────────────────┬───────────────────────────────────┘
+                                   │
+                                   ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  🧠  LAYER 3 · Intelligence & Scoring                                │
+│                                                                      │
+│   ┌──────────────┐    ┌──────────────────┐    ┌──────────────────┐  │
+│   │ 📊 Entropy    │    │ 🔍 Root Cause    │    │ 💯 Health Score  │  │
+│   │   Scorer     │    │   Analyzer       │    │   Calculator     │  │
+│   │  (0–100%)    │    │  (Auto-Diag)     │    │   (0–100)        │  │
+│   └──────────────┘    └──────────────────┘    └──────────────────┘  │
+└──────────────────────────────────┬───────────────────────────────────┘
+                                   │
+                                   ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  📋  LAYER 4 · Actionable Reporting                                  │
+│                                                                      │
+│   ┌──────────────┐      ┌──────────────────┐      ┌──────────────┐  │
+│   │ 🖥️ Interactive│─────▶│ 💡 Fix Advice    │─────▶│ 🚦 CI Trust  │  │
+│   │   Dashboard  │      │  (AI-Powered)    │      │   Gate       │  │
+│   └──────────────┘      └──────────────────┘      └──────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Step-by-Step Guide
+
+### 1. Install the CLI Globally
+To use the tool across any project on your machine, install it globally via npm:
+```bash
+npm install -g selenium-flaky-detector
+```
+
+### 2. Verify Installation
+Ensure the CLI is installed correctly by checking the version or help menu:
+```bash
+selenium-flaky-detect --help
+```
+
+### 3. Prepare Your Java Project
+The detector relies on Maven Surefire to generate XML test reports. You must ensure your `pom.xml` is configured to **not fail the build immediately** when a test fails, so all tests can finish.
+
+Add this property to your `maven-surefire-plugin` configuration:
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-surefire-plugin</artifactId>
+  <version>3.2.5</version>
+  <configuration>
+    <!-- Crucial: Let the build succeed even if tests fail -->
+    <testFailureIgnore>true</testFailureIgnore>
+  </configuration>
+</plugin>
+```
+
+### 4. Run the Detector
+Navigate to your project's root directory (where the `pom.xml` lives) and run the detector. Specify how many times you want the suite to run to calculate entropy.
+
+```bash
+# General Usage (Runs tests 3 times by default)
+selenium-flaky-detect --project .
+
+# Run 5 times for higher confidence
+selenium-flaky-detect --project . --runs 5
+
+# Filter specific test classes using Surefire's -Dtest format
+selenium-flaky-detect --project . --runs 3 --spec "LoginTest,CheckoutTest"
+```
+
+### 5. Review the Premium Report
+Once all runs are complete, the tool will automatically open a highly interactive HTML dashboard in your default browser:
+*   **Identify** tests with a `Flakiness Score` between 1% and 99%.
+*   **Analyze** the automatically generated *Root Cause (RCA)* tags (e.g., Timeout, Stale Element).
+*   **Fix** the tests using the AI-powered code suggestions provided for each specific RCA.
+
+---
+
+## 🎮 Quick Start: Run the Demo
+
+Want to see it in action without configuring your own project? We built a dummy Spring Boot E-Commerce app with 7 intentional sources of flakiness directly into the package.
+```bash
+# One command — starts app, runs tests 3×, opens the HTML report
+npx selenium-flaky-detect --demo
+
+# PowerShell: specify number of runs
+$env:RUNS="5"; npx selenium-flaky-detect --demo
+
+# Bash / macOS / Linux
+RUNS=5 npx selenium-flaky-detect --demo
+```
+
+### 🔌 Use With Your Own Project
+```bash
+# Install globally
+npm install -g selenium-flaky-detector
+
+# Run against your Maven project
+selenium-flaky-detect --project ./my-java-project --runs 3
+
+# With CI gate (fails if health score < threshold)
+selenium-flaky-detect --project . --runs 5 --threshold 80
+```
+
+---
+
+## 📦 Installation
+
+```bash
+# Global CLI (recommended)
+npm install -g selenium-flaky-detector
+
+# Or use directly with npx (no install needed)
+npx selenium-flaky-detect --help
+```
+
+**Requirements:**
+- Node.js ≥ 14
+- Java 17+
+- Maven or Gradle
+- Google Chrome + ChromeDriver (auto-managed by WebDriverManager)
+
+---
+
+## ⚙️ CLI Options
+
+| Option | Default | Description |
+|---|---|---|
+| `--runs <n>` | `3` | Number of times to repeat the test suite |
+| `--project <path>` | `.` | Path to the Maven/Gradle project |
+| `--output <path>` | `./flaky-report` | Output directory for the HTML report |
+| `--spec <pattern>` | *(all)* | Test class filter (e.g. `*Login*`) |
+| `--threshold <n>` | `70` | CI gate minimum health score (0–100) |
+| `--no-open` | *(auto-open)* | Skip auto-opening the HTML report |
+| `--demo` | — | Run the built-in ShopFlake Java demo |
+
+---
+
+## 🧩 Programmatic API
+
+```javascript
+const { FlakyDetector } = require('selenium-flaky-detector');
+
+const detector = new FlakyDetector({
+  runs: 3,
+  projectPath: './my-java-project',
+  outputDir: './flaky-report',
+  specPattern: '**/LoginTest*',
+  ciThreshold: 80,
+  openReport: true,
+  buildTool: 'maven', // or 'gradle' — auto-detected by default
+});
+
+const result = await detector.run();
+
+console.log(result.healthScore);    // 0–100
+console.log(result.passed);         // true if healthScore >= threshold
+console.log(result.scores);         // per-test flakiness scores
+console.log(result.analysis);       // root cause analysis
+console.log(result.reportPath);     // absolute path to HTML report
+```
+
+---
+
+## 📊 Entropy-Based Flakiness Scoring
+
+```
+╔══════════════════════════════════════════════════╗
+║  Flakiness = 4 × passRate × (1 − passRate) × 100  ║
+╚══════════════════════════════════════════════════╝
+```
+
+| Score | Meaning | Indicator |
+|---|---|---|
+| 0% | Stable — always passes OR always fails | 🟢 |
+| 1–49% | Mildly flaky | 🟡 |
+| 50–79% | Moderately flaky | 🟠 |
+| 80–99% | Severely flaky | 🔴 |
+| 100% | Perfectly flaky — exact 50/50 split | 💀 |
+
+---
+
+## 🔍 Root Cause Analysis
+
+The engine auto-classifies Selenium failures:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  Selenium RCA Pattern Engine                                   │
+│                                                                │
+│  StaleElementReferenceException  ──▶  ♻️  Stale Element       │
+│  TimeoutException                ──▶  ⏱️  Timeout             │
+│  NoSuchElementException          ──▶  🔍  Missing Element      │
+│  ElementNotInteractableException ──▶  👁️  Element Not Ready   │
+│  AssertionError / TestNG Assert  ──▶  ⚡  Async Load           │
+│  SocketException / ConnectError  ──▶  🌐  Network / Connection │
+│  WebDriverException              ──▶  🚗  WebDriver Instability│
+│  ConfigurationFailure            ──▶  🔧  Config Failure      │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🛠️ AI-Powered Fix Recommendations
+
+### ♻️ Fix: StaleElementReferenceException
+
+```java
+// ❌ Problem: Cached element goes stale after DOM update
+WebElement btn = driver.findElement(By.id("submit"));
+waitFor(someCondition);
+btn.click();  // StaleElementReferenceException!
+
+// ✅ Fix: Re-fetch element just before interaction
+waitFor(someCondition);
+driver.findElement(By.id("submit")).click();
+```
+
+### ⏱️ Fix: TimeoutException / Hard Waits
+
+```java
+// ❌ Problem: Hard-coded sleep is fragile
+Thread.sleep(3000);
+driver.findElement(By.id("product-list")).click();
+
+// ✅ Fix: Explicit wait for element to be clickable
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+WebElement el = wait.until(ExpectedConditions.elementToBeClickable(By.id("product-list")));
+el.click();
+```
+
+### ⚡ Fix: AssertionError on Async Count
+
+```java
+// ❌ Problem: Count assertion before async load completes
+List<WebElement> products = driver.findElements(By.className("product-card"));
+assertEquals(12, products.size());
+
+// ✅ Fix: Wait for expected count first
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+List<WebElement> products = wait.until(
+    ExpectedConditions.numberOfElementsToBe(By.className("product-card"), 12)
+);
+assertEquals(12, products.size());
+```
+
+---
+
+## 📁 Project Structure
+
+```
+selenium-flaky-detector/
+│
+├── 📦 package.json               # npm configuration & CLI bin entry
+├── 🚀 run-demo.js                # One-click demo orchestrator
+│
+├── bin/
+│   └── 💻 flaky-detect.js        # CLI entry point (global binary)
+│
+├── lib/
+│   ├── 📋 index.js               # Public API — FlakyDetector class
+│   ├── ⚙️  orchestrator.js        # Layer 1: Demo lifecycle manager
+│   ├── 🔢 runner.js              # Layer 2: Multi-run Maven/Gradle executor
+│   ├── 📄 parser.js              # Layer 2: Surefire XML report parser
+│   ├── 📊 scorer.js              # Layer 3: Entropy scorer + health score
+│   ├── 🔍 analyzer.js            # Layer 3: Root cause analyzer (7 patterns)
+│   └── 🖥️  reporter.js           # Layer 4: Premium HTML dashboard generator
+│
+└── demo-app/                     # ☕ Java Spring Boot ShopFlake Demo
+    ├── pom.xml                   # Maven config (Selenium 4, JUnit 5)
+    └── src/
+        ├── main/java/io/shopflake/
+        │   ├── ShopFlakeApplication.java   # Spring Boot entry point
+        │   └── controller/
+        │       ├── ShopController.java     # Page routes (/, /cart, /deals)
+        │       └── ApiController.java      # REST API (7 flakiness sources!)
+        ├── main/resources/
+        │   ├── application.properties
+        │   └── templates/
+        │       ├── index.html              # 🛒 Product grid (flaky: async load)
+        │       ├── cart.html               # 🛒 Cart (flaky: 30% stale data)
+        │       └── deals.html              # ⚡ Deals (maximally flaky: 50/50)
+        └── test/java/io/shopflake/tests/
+            ├── ShopFlakeBaseTest.java       # Shared WebDriver setup
+            ├── ProductLoadingTest.java      # 🟡 FLAKY: async timing
+            ├── CartFunctionalityTest.java   # 🟠 FLAKY: race conditions
+            ├── FlashDealsTest.java          # 🔴 VERY FLAKY: 50/50
+            ├── StableControlTest.java       # 🟢 STABLE: control group
+            └── SearchAndSessionTest.java    # 🟡 MIXED: some flaky
+```
+
+---
+
+## 🛒 ShopFlake Demo — Flakiness Sources
+
+The demo app has **7 intentional flakiness sources**:
+
+| # | Source | Location | Flakiness |
+|---|---|---|---|
+| 1 | Product count varies (11 or 12) | `ApiController.java` | ~50% |
+| 2 | Random network delay 0–1500ms | `ApiController.java` | Timing-based |
+| 3 | 30% stale cart (race condition) | `ApiController.java` | 30% |
+| 4 | 50/50 flash deal availability | `ApiController.java` | ~100% |
+| 5 | Cart-add lock every 3rd call | `ApiController.java` | ~33% |
+| 6 | Variable search results (2–4) | `ApiController.java` | Variable |
+| 7 | 25% session expiry | `ApiController.java` | 25% |
+
+---
+
+## 📊 Report Features
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  📋  FLAKY TEST REPORT                           Health: 68/100  ║
+╠══════════════════════════════════════════════════════════════════╣
+║  💯  Suite Health Score     ██████████████░░░░  68 / 100         ║
+║  🔥  Pass/Fail Heatmap      [Run 1][Run 2][Run 3][Run 4][Run 5]  ║
+║  🤖  AI Recommendations     7 actionable fixes found             ║
+║  🏷️  Root Cause Labels      ⏱Timeout · ♻Stale · ⚡Async        ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+| Feature | Description |
+|---|---|
+| 💯 Suite Health Score | Overall reliability index from 0–100 (animated ring) |
+| 🔥 Pass/Fail Heatmap | Visual grid — ✓/✗ per test per run |
+| 🤖 AI Recommendations | Specific, actionable Java/Selenium fix snippets |
+| 🏷️ Root Cause Labels | Auto-tags: StaleElement, Timeout, NoSuchElement, etc. |
+| 🚦 CI Trust Gate | Hard pass/fail with configurable threshold |
+
+---
+
+## 🤖 CI/CD Integration
+
+```yaml
+# GitHub Actions example
+- name: Run Flaky Detection
+  run: npx selenium-flaky-detect --runs 3 --threshold 75
+  # Exits with code 1 if health score < 75 (blocks merge)
+```
+
+```json
+// package.json scripts
+{
+  "scripts": {
+    "flaky:check": "selenium-flaky-detect --runs 3 --threshold 70",
+    "flaky:demo": "selenium-flaky-detect --demo"
+  }
+}
+```
+
+---
+
+## 📄 Framework Configuration
+
+The detector supports both **JUnit 5** and **TestNG** projects via Maven Surefire or Gradle.
+
+### Maven (JUnit 5 / TestNG)
+Ensure your `pom.xml` generates standard reports:
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-surefire-plugin</artifactId>
+  <version>3.2.5</version>
+  <configuration>
+    <!-- Never stop on failures — let detector analyze all results -->
+    <testFailureIgnore>true</testFailureIgnore>
+    <!-- JUnit XML report location (Automatically parsed) -->
+    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+    
+    <!-- TestNG Specific: If using testng.xml -->
+    <!-- <suiteXmlFiles><suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile></suiteXmlFiles> -->
+  </configuration>
+</plugin>
+```
+
+### TestNG results.xml (Native)
+We also support parsing the native `testng-results.xml` file if your configuration generates it! Simply point the detector to the directory containing this file.
+
+---
+
+## 🔗 Links
+
+- [npm Package](https://www.npmjs.com/package/selenium-flaky-detector)
+- [GitHub Repository](https://github.com/your-org/selenium-flaky-detector)
+- [Report Issues](https://github.com/your-org/selenium-flaky-detector/issues)
+- [Changelog](CHANGELOG.md)
+
+---
+
+## 📄 License
+
+MIT © [SeleniumFlaky Contributors](https://github.com/your-org/selenium-flaky-detector)

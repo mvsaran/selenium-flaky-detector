@@ -1,0 +1,7 @@
+node_modules/
+flaky-report/
+demo-app/target/
+*.log
+.env
+.DS_Store
+Thumbs.db

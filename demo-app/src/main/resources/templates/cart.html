@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ShopFlake · Cart</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --accent: #6366f1;
+            --text: #f1f5f9;
+            --dim: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            gap: 32px;
+        }
+
+        nav .brand {
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        nav a {
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 0 24px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .cart-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item:last-child {
+            border: none;
+        }
+
+        .item-icon {
+            font-size: 32px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .item-qty {
+            color: var(--dim);
+            font-size: 14px;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            margin-top: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 60px;
+            color: var(--dim);
+        }
+
+        .stale-warn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--danger);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <span class="brand">🛒 ShopFlake</span>
+        <a href="/">Products</a>
+        <a href="/cart">Cart</a>
+        <a href="/deals">⚡ Deals</a>
+    </nav>
+    <main>
+        <h1>🛒 Your Cart</h1>
+        <div id="stale-warning" class="stale-warn">
+            ⚠️ Cart data may be stale — detected race condition in session cache
+        </div>
+        <div id="cart-container">Loading cart…</div>
+    </main>
+    <script>
+        async function loadCart() {
+            try {
+                const res = await fetch('/api/cart');
+                const data = await res.json();
+                const container = document.getElementById('cart-container');
+                const staleWarn = document.getElementById('stale-warning');
+
+                if (data.stale) {
+                    staleWarn.style.display = 'block';  // Visible indicator of the race condition
+                }
+
+                if (!data.items || data.items.length === 0) {
+                    container.innerHTML = '<div class="empty-msg" id="empty-cart-msg">🛒 Your cart is empty<br/><a href="/">Continue shopping →</a></div>';
+                    return;
+                }
+
+                container.innerHTML = `
+      <div class="cart-card">
+        ${data.items.map(item => `
+          <div class="cart-item" id="cart-item-${item.id}">
+            <div class="item-icon">🎧</div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-qty">Qty: ${item.quantity}</div>
+            <div class="item-price">$${item.price.toFixed(2)}</div>
+          </div>
+        `).join('')}
+        <div class="cart-total">
+          <span>Total</span>
+          <span id="cart-total">$${data.total.toFixed(2)}</span>
+        </div>
+        <button class="checkout-btn" id="checkout-btn" onclick="alert('Checkout flow coming soon!')">
+          Proceed to Checkout →
+        </button>
+      </div>
+    `;
+            } catch (e) {
+                document.getElementById('cart-container').innerHTML = '<div style="color:var(--danger)">Error loading cart</div>';
+            }
+        }
+        loadCart();
+    </script>
+</body>
+
+</html>

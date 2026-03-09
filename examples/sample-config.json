@@ -1,0 +1,10 @@
+{
+    "_comment": "Example configuration for selenium-flaky-detector",
+    "runs": 3,
+    "projectPath": "./my-java-project",
+    "outputDir": "./flaky-report",
+    "specPattern": "",
+    "ciThreshold": 70,
+    "openReport": true,
+    "buildTool": "maven"
+}

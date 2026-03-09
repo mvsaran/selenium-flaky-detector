@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>ShopFlake · Flash Deals</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --accent: #6366f1;
+            --text: #f1f5f9;
+            --dim: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            gap: 32px;
+        }
+
+        nav .brand {
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        nav a {
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 24px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--dim);
+            margin-bottom: 48px;
+        }
+
+        .deal-card {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .deal-card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .deal-emoji {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .deal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .deal-price {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .deal-timer {
+            font-size: 18px;
+            color: var(--dim);
+            margin-bottom: 24px;
+        }
+
+        .deal-timer strong {
+            color: #fbbf24;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .no-deal {
+            color: var(--dim);
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        #reload-deal {
+            margin-top: 24px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dim);
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #reload-deal:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .loading {
+            color: var(--dim);
+            padding: 40px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <span class="brand">🛒 ShopFlake</span>
+        <a href="/">Products</a>
+        <a href="/cart">Cart</a>
+        <a href="/deals">⚡ Deals</a>
+    </nav>
+    <main>
+        <h1>⚡ Flash Deals</h1>
+        <p class="subtitle">Limited-time offers · Refreshes every 10 seconds · 50/50 availability</p>
+        <div id="deal-container" class="loading">Checking for deals…</div>
+        <button id="reload-deal" onclick="loadDeal()">🔄 Check Again</button>
+    </main>
+    <script>
+        async function loadDeal() {
+            const container = document.getElementById('deal-container');
+            container.className = 'loading';
+            container.innerHTML = 'Checking for deals…';
+            try {
+                const res = await fetch('/api/deals');
+                const data = await res.json();
+                if (data.dealAvailable) {
+                    container.className = 'deal-card active';
+                    container.innerHTML = `
+          <div class="deal-emoji">⚡</div>
+          <div class="deal-title" id="flash-deal-title">${data.dealTitle}</div>
+          <div class="deal-price" id="flash-deal-price">$${data.dealPrice}</div>
+          <div class="deal-timer">Expires in: <strong id="flash-deal-timer">${data.expiresIn}</strong></div>
+          <button class="btn" id="grab-deal-btn" onclick="alert('Deal added to cart!')">🛒 Grab This Deal</button>
+        `;
+                } else {
+                    container.className = 'deal-card';
+                    container.innerHTML = '<div class="no-deal" id="no-deal-msg">😔 No flash deals right now.<br/>Check back soon!</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="color:var(--danger)">Error loading deals</div>';
+            }
+        }
+        loadDeal();
+        setInterval(loadDeal, 10000);
+    </script>
+</body>
+
+</html>

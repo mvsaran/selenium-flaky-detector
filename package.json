@@ -1,0 +1,64 @@
+{
+  "name": "selenium-flaky-detector",
+  "version": "1.0.0",
+  "description": "🔍 Detect, score, and fix flaky Selenium/Java tests using entropy-based analysis, root-cause diagnosis, and a premium HTML dashboard.",
+  "author": "SeleniumFlaky Contributors",
+  "license": "MIT",
+  "keywords": [
+    "selenium",
+    "java",
+    "flaky-tests",
+    "test-automation",
+    "junit",
+    "surefire",
+    "flakiness",
+    "testing",
+    "ci",
+    "webdriver",
+    "entropy",
+    "root-cause-analysis",
+    "html-report",
+    "test-reliability"
+  ],
+  "homepage": "https://github.com/your-org/selenium-flaky-detector#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/selenium-flaky-detector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/selenium-flaky-detector/issues"
+  },
+  "main": "lib/index.js",
+  "bin": {
+    "selenium-flaky-detect": "./bin/flaky-detect.js",
+    "flaky-detect": "./bin/flaky-detect.js"
+  },
+  "scripts": {
+    "start:demo": "node lib/orchestrator.js",
+    "demo": "node run-demo.js",
+    "report": "node -e \"const r=require('./lib/reporter'); r.openLatestReport()\"",
+    "test": "echo \"No unit tests yet\""
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.2.0",
+    "xml2js": "^0.6.2",
+    "open": "^8.4.2",
+    "commander": "^11.1.0",
+    "ora": "^5.4.1",
+    "figlet": "^1.7.0",
+    "boxen": "^5.1.2",
+    "gradient-string": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "demo-app/",
+    "examples/",
+    "README.md",
+    "run-demo.js"
+  ]
+}
