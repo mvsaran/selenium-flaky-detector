@@ -42,15 +42,16 @@ public class ProductLoadingTest extends ShopFlakeBaseTest {
     public void footerCopyrightAlwaysPresent() throws InterruptedException {
         navigate("/");
 
-        // ❌ FLAKINESS: 700ms sleep is sometimes not enough for 0–1500ms API delay
-        // This creates genuine 50/50 flakiness (sometimes catches loaded state,
-        // sometimes not)
-        Thread.sleep(700);
+        // ✅ FIXED: Replaced arbitrary sleep with an explicit wait for the text to
+        // appear
+        org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(driver,
+                java.time.Duration.ofSeconds(10));
+        wait.until(org.openqa.selenium.support.ui.ExpectedConditions
+                .textToBePresentInElementLocated(By.id("status-bar"), "Loaded"));
 
         WebElement statusBar = driver.findElement(By.id("status-bar"));
         String statusText = statusBar.getText();
 
-        // Flakes because status may still say "Fetching products from API…"
         assertThat(statusText)
                 .as("Status bar should confirm products loaded")
                 .contains("Loaded");

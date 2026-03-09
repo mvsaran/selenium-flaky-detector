@@ -97,8 +97,10 @@ public class CartFunctionalityTest extends ShopFlakeBaseTest {
                     "Root cause: StaleElementReferenceException — DOM was updated during interaction.");
         }
 
-        // ❌ FLAKINESS: short wait may not be enough on the race condition call
-        Thread.sleep(800);
+        // ✅ FIXED: Explicitly wait for the cart badge text to update to "1"
+        new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10))
+                .until(org.openqa.selenium.support.ui.ExpectedConditions
+                        .textToBePresentInElementLocated(By.id("nav-cart-count"), "1"));
 
         WebElement badge = driver.findElement(By.id("nav-cart-count"));
         assertThat(badge.getText())
