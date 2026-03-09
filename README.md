@@ -433,12 +433,12 @@ We also support parsing the native `testng-results.xml` file if your configurati
 ## 🔗 Links
 
 - [npm Package](https://www.npmjs.com/package/selenium-flaky-detector)
-- [GitHub Repository](https://github.com/your-org/selenium-flaky-detector)
-- [Report Issues](https://github.com/your-org/selenium-flaky-detector/issues)
+- [GitHub Repository](https://github.com/mvsaran/selenium-flaky-detector)
+- [Report Issues](https://github.com/mvsaran/selenium-flaky-detector/issues)
 - [Changelog](CHANGELOG.md)
 
 ---
 
 ## 📄 License
 
-MIT © [SeleniumFlaky Contributors](https://github.com/your-org/selenium-flaky-detector)
+MIT © [SeleniumFlaky Contributors](https://github.com/mvsaran/selenium-flaky-detector)

@@ -2,7 +2,7 @@
   "name": "selenium-flaky-detector",
   "version": "1.0.0",
   "description": "🔍 Detect, score, and fix flaky Selenium/Java tests using entropy-based analysis, root-cause diagnosis, and a premium HTML dashboard.",
-  "author": "SeleniumFlaky Contributors",
+  "author": "mvsaran",
   "license": "MIT",
   "keywords": [
     "selenium",
@@ -20,13 +20,13 @@
     "html-report",
     "test-reliability"
   ],
-  "homepage": "https://github.com/your-org/selenium-flaky-detector#readme",
+  "homepage": "https://github.com/mvsaran/selenium-flaky-detector#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/selenium-flaky-detector.git"
+    "url": "git+https://github.com/mvsaran/selenium-flaky-detector.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/selenium-flaky-detector/issues"
+    "url": "https://github.com/mvsaran/selenium-flaky-detector/issues"
   },
   "main": "lib/index.js",
   "bin": {
