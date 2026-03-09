@@ -145,6 +145,41 @@ npx selenium-flaky-detect --demo
 npx selenium-flaky-detect --demo --runs 5
 ```
 
+### 🌐 View the ShopFlake App in your Browser
+If you just want to run the buggy E-commerce app yourself to see what the test framework interacts with:
+```bash
+# Navigate into the demo application folder
+cd demo-app
+
+# Start the Spring Boot server
+mvn spring-boot:run
+```
+Once it says "Started ShopFlakeApplication", open your browser and go to **`http://localhost:8080`** to play around with the intentionally flaky ShopFlake storefront!
+
+---
+
+## 🪄 AI Auto-Healing Workflow (How to fix a test!)
+
+Want to see the detector's AI suggestions actually cure flakiness? Try this hands-on cycle with the demo:
+
+**1. Run the Detector & Find a Flaky Test**
+Notice that `ProductLoadingTest#footerCopyrightAlwaysPresent` is flagged as 🔴 **Severely Flaky** with the `⚡ RCA: Async Load` tag.
+
+**2. Apply the AI Suggestion**
+Open `demo-app/src/test/java/io/shopflake/tests/ProductLoadingTest.java`. Find the failing test and replace the bad hardcoded `Thread.sleep()` with the explicit wait suggested by the dashboard:
+
+```java
+// ❌ FLAKINESS: Arbitrary sleep causes 50/50 race condition
+// Thread.sleep(700);
+
+// ✅ FIXED: Explicitly wait for the asynchronous status text to update
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("status-bar"), "Loaded"));
+```
+
+**3. Run the Detector Again**
+Run `npx selenium-flaky-detect --demo --runs 3` one more time. You will now see `footerCopyrightAlwaysPresent` flagged as 🟢 **STABLE** (0% Flaky)!
+
 ---
 
 ## 📦 Installation
