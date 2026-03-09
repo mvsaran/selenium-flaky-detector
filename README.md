@@ -26,6 +26,28 @@ By focusing on entropy, we ignore "consistently broken" tests (which are just re
 
 ---
 
+## ⚡ Simplified Usage (The 3-Step Guide)
+
+If you just want to get started immediately, follow these three simple steps:
+
+### 1️⃣ Step 1: Install the Plugin
+Open your terminal and install the tool globally so you can use it anywhere:
+```bash
+npm install -g selenium-flaky-detector
+```
+
+### 2️⃣ Step 2: Run the Command
+Navigate to your Maven/Gradle project folder and trigger the detector (it will run your tests 3 times by default):
+```bash
+# Point it to your project folder
+selenium-flaky-detect --project .
+```
+
+### 3️⃣ Step 3: See the Reports
+Once finished, an interactive **HTML Dashboard** will automatically pop up in your browser. Review your "Flakiness Score" and apply the AI-powered fix recommendations!
+
+---
+
 ## 🏗️ Architecture
 
 ```
