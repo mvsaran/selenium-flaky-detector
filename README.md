@@ -37,10 +37,10 @@ npm install -g selenium-flaky-detector
 ```
 
 ### 2️⃣ Step 2: Run the Command
-Navigate to your Maven/Gradle project folder and trigger the detector (it will run your tests 3 times by default):
+Navigate to your Maven/Gradle project folder and trigger the detector:
 ```bash
-# Point it to your project folder
-selenium-flaky-detect --project .
+# Recommended for development (runs 3 times)
+npx selenium-flaky-detect --runs 3
 ```
 
 ### 3️⃣ Step 3: See the Reports
@@ -52,12 +52,12 @@ Once finished, an interactive **HTML Dashboard** will automatically pop up in yo
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  🎭  LAYER 1 · Orchestration & Simulation                            │
+│  🎭  LAYER 1 · Orchestration                                         │
 │                                                                      │
 │   ┌──────────────┐      ┌──────────────────┐      ┌──────────────┐  │
-│   │  🛒 ShopFlake │─────▶│ ⚙️  Orchestrator  │─────▶│ ☕  Maven    │  │
-│   │   Demo App   │      │  Engine          │      │   Runner     │  │
-│   │ (Spring Boot)│      │  (run-demo.js)   │      │ (Surefire)   │  │
+│   │ Your Project │─────▶│ ⚙️  Orchestrator  │─────▶│ ☕  Maven    │  │
+│   │ (Maven/Gradle)│      │  Engine          │      │   Runner     │  │
+│   │              │      │  Command         │      │ (Surefire)   │  │
 │   └──────────────┘      └──────────────────┘      └──────────────┘  │
 └──────────────────────────────────┬───────────────────────────────────┘
                                    │
@@ -96,7 +96,7 @@ Once finished, an interactive **HTML Dashboard** will automatically pop up in yo
 
 ### 🧩 Understanding the Layers
 
-*   **Layer 1: Orchestration & Simulation.** Handles the CLI orchestrator to launch tests. For the built-in demo, this simulates a real-world project by spinning up the intentionally-flaky "ShopFlake" Spring Boot container and dispatching the Maven runner against it.
+*   **Layer 1: Orchestration.** Handles the CLI orchestrator to launch your test suite. It manages the lifecycle of the Maven/Gradle runner.
 *   **Layer 2: Test Execution Loop.** Executes your Selenium test suite multiple times (`N` repeats) to gather a reliable sample size. It continuously parses the generated `Surefire XML` reports, capturing every failure trace, error message, and test duration.
 *   **Layer 3: Intelligence & Scoring.** The brain of the detector. The **Entropy Scorer** mathematically calculates a test's exact `Flakiness Percentage` (0–100%) and generates a global `Suite Health Score`. Next, the **Root Cause Analyzer** scans the failed Java stack traces, pattern-matching against known Selenium exceptions to categorize exactly *why* it failed (e.g., `StaleElementReferenceException`). 
 *   **Layer 4: Actionable Reporting.** Translates the raw data into an interactive HTML dashboard. Recommends specific, AI-driven Java/Selenium code fixes (e.g., *“Add explicit wait here”*) based on the identified root cause. Optionally acts as a **CI Trust Gate** to aggressively block builds if flaky tests cross a configured threshold.
@@ -134,24 +134,27 @@ Add this property to your `maven-surefire-plugin` configuration:
 ```
 
 ### 4. Run the Detector on Your Project
-Run the `selenium-flaky-detect` command. 
+Navigate to your project's root directory (where the `pom.xml` lives) and run the `npx` command:
 
-If your terminal is already inside your Java project (where `pom.xml` lives):
 ```bash
-# Run 3 times by default
-selenium-flaky-detect --project .
+# Recommended for development (runs 3 times)
+npx selenium-flaky-detect --runs 3
 ```
+
+> [!TIP]
+> **Choosing the right run count:**
+> - `--runs 2`: Quick sanity check after applying a fix.
+> - `--runs 3`: (Default) Balanced speed and accuracy for local dev.
+> - `--runs 5+`: Recommended for CI/CD to catch rare, elusive flakes.
 
 If your terminal is somewhere else, you can provide the **absolute path** to your Java project:
 ```bash
-# Point directly to any Maven project on your machine
-selenium-flaky-detect --project /Users/mvsaran/my-java-app --runs 5
+npx selenium-flaky-detect --project /Users/mvsaran/my-java-app --runs 5
 ```
 
 If you only want to analyze a specific subset of test classes (to save time):
 ```bash
-# Filter specific test classes using Surefire's -Dtest format
-selenium-flaky-detect --project . --runs 3 --spec "LoginTest,CheckoutTest"
+npx selenium-flaky-detect --runs 3 --spec "LoginTest,CheckoutTest"
 ```
 
 ### 5. Review the Premium Report
@@ -160,54 +163,11 @@ Once all runs are complete, the tool will automatically open a highly interactiv
 *   **Analyze** the automatically generated *Root Cause (RCA)* tags (e.g., Timeout, Stale Element).
 *   **Fix** the tests using the AI-powered code suggestions provided for each specific RCA.
 
----
-
-## 🎮 Quick Start: Run the Demo
-
-Want to see it in action without configuring your own project? We built a dummy Spring Boot E-Commerce app with 7 intentional sources of flakiness directly into the package.
-
-```bash
-# One command — starts app, runs tests 3×, opens the HTML report
-npx selenium-flaky-detect --demo
-
-# Specify exactly how many runs you want the demo to perform
-npx selenium-flaky-detect --demo --runs 5
-```
-
-### 🌐 View the ShopFlake App in your Browser
-If you just want to run the buggy E-commerce app yourself to see what the test framework interacts with:
-```bash
-# Navigate into the demo application folder
-cd demo-app
-
-# Start the Spring Boot server
-mvn spring-boot:run
-```
-Once it says "Started ShopFlakeApplication", open your browser and go to **`http://localhost:8080`** to play around with the intentionally flaky ShopFlake storefront!
-
----
-
-## 🪄 AI Auto-Healing Workflow (How to fix a test!)
-
-Want to see the detector's AI suggestions actually cure flakiness? Try this hands-on cycle with the demo:
-
-**1. Run the Detector & Find a Flaky Test**
-Notice that `ProductLoadingTest#footerCopyrightAlwaysPresent` is flagged as 🔴 **Severely Flaky** with the `⚡ RCA: Async Load` tag.
-
-**2. Apply the AI Suggestion**
-Open `demo-app/src/test/java/io/shopflake/tests/ProductLoadingTest.java`. Find the failing test and replace the bad hardcoded `Thread.sleep()` with the explicit wait suggested by the dashboard:
-
-```java
-// ❌ FLAKINESS: Arbitrary sleep causes 50/50 race condition
-// Thread.sleep(700);
-
-// ✅ FIXED: Explicitly wait for the asynchronous status text to update
-WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("status-bar"), "Loaded"));
-```
-
-**3. Run the Detector Again**
-Run `npx selenium-flaky-detect --demo --runs 3` one more time. You will now see `footerCopyrightAlwaysPresent` flagged as 🟢 **STABLE** (0% Flaky)!
+### 🔄 6. Fix, Re-Run, and Verify
+**This is the most important step!** After you apply a fix to your Java files:
+1.  **Do NOT** run `mvn test` directly (it will fail on the first error and stop).
+2.  **Instead**, re-run the detector using `npx`: `npx selenium-flaky-detect --runs 3`.
+3.  The tool will automatically handle the errors, finish the runs, and update your **Health Score** to show that the test is now 🟢 **STABLE**.
 
 ---
 
@@ -398,21 +358,8 @@ selenium-flaky-detector/
 
 ---
 
-## 🛒 ShopFlake Demo — Flakiness Sources
-
-The demo app has **7 intentional flakiness sources**:
-
-| # | Source | Location | Flakiness |
-|---|---|---|---|
-| 1 | Product count varies (11 or 12) | `ApiController.java` | ~50% |
-| 2 | Random network delay 0–1500ms | `ApiController.java` | Timing-based |
-| 3 | 30% stale cart (race condition) | `ApiController.java` | 30% |
-| 4 | 50/50 flash deal availability | `ApiController.java` | ~100% |
-| 5 | Cart-add lock every 3rd call | `ApiController.java` | ~33% |
-| 6 | Variable search results (2–4) | `ApiController.java` | Variable |
-| 7 | 25% session expiry | `ApiController.java` | 25% |
-
 ---
+
 
 ## 📊 Report Features
 
@@ -450,8 +397,7 @@ The demo app has **7 intentional flakiness sources**:
 // package.json scripts
 {
   "scripts": {
-    "flaky:check": "selenium-flaky-detect --runs 3 --threshold 70",
-    "flaky:demo": "selenium-flaky-detect --demo"
+    "flaky:check": "selenium-flaky-detect --runs 3 --threshold 70"
   }
 }
 ```
