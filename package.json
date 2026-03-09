@@ -1,6 +1,6 @@
 {
   "name": "selenium-flaky-detector",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "🔍 Detect, score, and fix flaky Selenium/Java tests using entropy-based analysis, root-cause diagnosis, and a premium HTML dashboard.",
   "author": "mvsaran",
   "license": "MIT",
@@ -30,8 +30,8 @@
   },
   "main": "lib/index.js",
   "bin": {
-    "selenium-flaky-detect": "./bin/flaky-detect.js",
-    "flaky-detect": "./bin/flaky-detect.js"
+    "selenium-flaky-detect": "bin/flaky-detect.js",
+    "flaky-detect": "bin/flaky-detect.js"
   },
   "scripts": {
     "start:demo": "node lib/orchestrator.js",
@@ -56,9 +56,11 @@
   "files": [
     "bin/",
     "lib/",
-    "demo-app/",
+    "demo-app/src/",
+    "demo-app/pom.xml",
     "examples/",
     "README.md",
-    "run-demo.js"
+    "run-demo.js",
+    "LICENSE"
   ]
 }

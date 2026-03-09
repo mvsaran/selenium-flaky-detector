@@ -2,7 +2,7 @@
 
 > **Entropy-Based Flaky Test Detection for Selenium/Java Projects**
 >
-> Detect, score, and fix flaky Selenium tests with a premium interactive dashboard, root-cause analysis, and AI-powered fix recommendations.
+> Detect, score, and fix flaky Selenium tests with a premium interactive dashboard, root-cause analysis, and smart fix recommendations.
 
 [![npm version](https://img.shields.io/npm/v/selenium-flaky-detector?style=flat-square&color=6366f1)](https://www.npmjs.com/package/selenium-flaky-detector)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
@@ -44,7 +44,7 @@ npx selenium-flaky-detect --runs 3
 ```
 
 ### 3️⃣ Step 3: See the Reports
-Once finished, an interactive **HTML Dashboard** will automatically pop up in your browser. Review your "Flakiness Score" and apply the AI-powered fix recommendations!
+Once finished, an interactive **HTML Dashboard** will automatically pop up in your browser. Review your "Flakiness Score" and apply the smart fix recommendations!
 
 ---
 
@@ -89,7 +89,7 @@ Once finished, an interactive **HTML Dashboard** will automatically pop up in yo
 │                                                                      │
 │   ┌──────────────┐      ┌──────────────────┐      ┌──────────────┐  │
 │   │ 🖥️ Interactive│─────▶│ 💡 Fix Advice    │─────▶│ 🚦 CI Trust  │  │
-│   │   Dashboard  │      │  (AI-Powered)    │      │   Gate       │  │
+│   │   Dashboard  │      │  (Smart RCA)     │      │   Gate       │  │
 │   └──────────────┘      └──────────────────┘      └──────────────┘  │
 └──────────────────────────────────────────────────────────────────────┘
 ```
@@ -99,7 +99,7 @@ Once finished, an interactive **HTML Dashboard** will automatically pop up in yo
 *   **Layer 1: Orchestration.** Handles the CLI orchestrator to launch your test suite. It manages the lifecycle of the Maven/Gradle runner.
 *   **Layer 2: Test Execution Loop.** Executes your Selenium test suite multiple times (`N` repeats) to gather a reliable sample size. It continuously parses the generated `Surefire XML` reports, capturing every failure trace, error message, and test duration.
 *   **Layer 3: Intelligence & Scoring.** The brain of the detector. The **Entropy Scorer** mathematically calculates a test's exact `Flakiness Percentage` (0–100%) and generates a global `Suite Health Score`. Next, the **Root Cause Analyzer** scans the failed Java stack traces, pattern-matching against known Selenium exceptions to categorize exactly *why* it failed (e.g., `StaleElementReferenceException`). 
-*   **Layer 4: Actionable Reporting.** Translates the raw data into an interactive HTML dashboard. Recommends specific, AI-driven Java/Selenium code fixes (e.g., *“Add explicit wait here”*) based on the identified root cause. Optionally acts as a **CI Trust Gate** to aggressively block builds if flaky tests cross a configured threshold.
+*   **Layer 4: Actionable Reporting.** Translates the raw data into an interactive HTML dashboard. Recommends specific, pattern-based Java/Selenium code fixes (e.g., *“Add explicit wait here”*) based on the identified root cause. Optionally acts as a **CI Trust Gate** to aggressively block builds if flaky tests cross a configured threshold.
 
 ---
 
@@ -161,7 +161,7 @@ npx selenium-flaky-detect --runs 3 --spec "LoginTest,CheckoutTest"
 Once all runs are complete, the tool will automatically open a highly interactive HTML dashboard in your default browser:
 *   **Identify** tests with a `Flakiness Score` between 1% and 99%.
 *   **Analyze** the automatically generated *Root Cause (RCA)* tags (e.g., Timeout, Stale Element).
-*   **Fix** the tests using the AI-powered code suggestions provided for each specific RCA.
+*   **Fix** the tests using the recommended code suggestions provided for each specific RCA.
 
 ### 🔄 6. Fix, Re-Run, and Verify
 **This is the most important step!** After you apply a fix to your Java files:
@@ -268,7 +268,7 @@ The engine auto-classifies Selenium failures:
 
 ---
 
-## 🛠️ AI-Powered Fix Recommendations
+## 🛠️ Smart Fix Recommendations
 
 ### ♻️ Fix: StaleElementReferenceException
 
@@ -369,7 +369,7 @@ selenium-flaky-detector/
 ╠══════════════════════════════════════════════════════════════════╣
 ║  💯  Suite Health Score     ██████████████░░░░  68 / 100         ║
 ║  🔥  Pass/Fail Heatmap      [Run 1][Run 2][Run 3][Run 4][Run 5]  ║
-║  🤖  AI Recommendations     7 actionable fixes found             ║
+║  💡  Smart Recommendations  7 actionable fixes found             ║
 ║  🏷️  Root Cause Labels      ⏱Timeout · ♻Stale · ⚡Async        ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
@@ -378,7 +378,7 @@ selenium-flaky-detector/
 |---|---|
 | 💯 Suite Health Score | Overall reliability index from 0–100 (animated ring) |
 | 🔥 Pass/Fail Heatmap | Visual grid — ✓/✗ per test per run |
-| 🤖 AI Recommendations | Specific, actionable Java/Selenium fix snippets |
+| 💡 Smart Recommendations | Specific, actionable Java/Selenium fix snippets |
 | 🏷️ Root Cause Labels | Auto-tags: StaleElement, Timeout, NoSuchElement, etc. |
 | 🚦 CI Trust Gate | Hard pass/fail with configurable threshold |
 
