@@ -80,21 +80,16 @@ public class CartFunctionalityTest extends ShopFlakeBaseTest {
                 .isFalse();
     }
 
-    /**
-     * 🟠 FLAKY: Add to cart race — every 3rd call has 400ms delay
-     * With short waits, this causes the cart badge to not update.
-     */
     @Test
     public void cartBadgeUpdatesAfterAdd() throws InterruptedException {
         navigate("/");
         Thread.sleep(1200); // Wait for products to load
 
-        // Find and click an add-to-cart button
+        // 🟢 REAL TEST (STABLE): Find and click an add-to-cart button
         try {
             List<WebElement> addBtns = driver
                     .findElements(By.cssSelector("[data-testid='add-to-cart-btn']:not([disabled])"));
             if (addBtns.isEmpty()) {
-                // All products out of stock in this run
                 throw new SkipException("No in-stock products available in this run");
             }
             addBtns.get(0).click();
@@ -103,7 +98,7 @@ public class CartFunctionalityTest extends ShopFlakeBaseTest {
                     "Root cause: StaleElementReferenceException — DOM was updated during interaction.");
         }
 
-        // ✅ FIXED: Explicitly wait for the cart badge text to update to "1"
+        // Explicitly wait for the cart badge text to update to "1"
         new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10))
                 .until(org.openqa.selenium.support.ui.ExpectedConditions
                         .textToBePresentInElementLocated(By.id("nav-cart-count"), "1"));
@@ -113,6 +108,26 @@ public class CartFunctionalityTest extends ShopFlakeBaseTest {
                 .as("Cart badge should show 1 after adding item")
                 .isEqualTo("1");
     }
+
+    /*
+     * // 🟠 FLAKY TEST EXAMPLE: Race Condition / Stale Element
+     * // Every 3rd call to 'add to cart' has a 400ms artificial delay in the
+     * backend.
+     * // Without waiting for the DOM to settle, this test will fail intermittently.
+     * 
+     * @Test
+     * public void flakyCartBadgeTest() {
+     * navigate("/");
+     * 
+     * // ❌ Problem: No wait for product loading before clicking
+     * driver.findElement(By.cssSelector("[data-testid='add-to-cart-btn']")).click()
+     * ;
+     * 
+     * // ❌ Problem: Direct assertion on badge without wait
+     * WebElement badge = driver.findElement(By.id("nav-cart-count"));
+     * assertThat(badge.getText()).isEqualTo("1"); // RCA: Race Condition (🏁)
+     * }
+     */
 
     /**
      * 🟢 STABLE: Checkout button present when cart has items

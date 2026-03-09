@@ -433,6 +433,35 @@ We also support parsing the native `testng-results.xml` file if your configurati
 
 ---
 
+---
+
+## 🔧 Troubleshooting & Common Issues
+
+### ❌ Error: "Requires a project to execute but there is no POM in this directory"
+This happens when Maven cannot find your `pom.xml` file. 
+
+**Resolution Steps:**
+1.  **Check your path:** Ensure you are running the command in the exact folder that contains `pom.xml`. 
+2.  **Subdirectories:** If your Java project is in a subfolder (e.g., `eclipse-workspace/MyProject`), you must point to that folder:
+    ```bash
+    npx selenium-flaky-detect --project "./MyProject" --runs 3
+    ```
+3.  **Use Absolute Paths:** If relative paths are failing, use the full path to the project:
+    ```bash
+    npx selenium-flaky-detect --project "C:\Users\Name\eclipse-workspace\TestNGFramework" --runs 3
+    ```
+4.  **Confirm Build Tool:** The tool auto-detects Maven (`pom.xml`) and Gradle (`build.gradle`). Ensure one of these files exists in the target directory.
+
+### ⚠️ Error: "No XML reports found"
+This usually means the tests didn't run at all or failed to generate reports.
+
+**Resolution Steps:**
+1.  **Run manually first:** Try running `mvn test` in your project folder to ensure Maven is installed and your tests are valid.
+2.  **Check `target` folder:** Ensure Maven is generating XML files in `target/surefire-reports`.
+3.  **Check Plugin Config:** Ensure `testFailureIgnore` is set to `true` in your `pom.xml` (see Step 3 in the Step-by-Step guide).
+
+---
+
 ## 🔗 Links
 
 - [npm Package](https://www.npmjs.com/package/selenium-flaky-detector)

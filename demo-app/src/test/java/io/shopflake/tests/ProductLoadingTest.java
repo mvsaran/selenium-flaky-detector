@@ -2,28 +2,21 @@ package io.shopflake.tests;
 
 import org.testng.annotations.*;
 import org.openqa.selenium.*;
-
 import java.util.List;
-
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * 🟡 01 · Product Loading Tests [FLAKY]
+ * 🟡 01 · Product Loading Tests
  * ========================================
  */
 public class ProductLoadingTest extends ShopFlakeBaseTest {
 
-    /**
-     * 🟡 FLAKY: Product count varies between 11 and 12
-     * API randomly returns 11 or 12 products.
-     * Test expects exactly 12 → fails ~50% of the time.
-     */
     @Test
     public void productImagesVisible() {
         navigate("/");
 
-        // ✅ FIXED: Wait until at least 11 product cards have loaded to avoid the race
-        // condition
+        // 🟢 REAL TEST (STABLE): Wait until at least 11 product cards have loaded to
+        // avoid the race
         org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(driver,
                 java.time.Duration.ofSeconds(10));
         wait.until(d -> d.findElements(By.cssSelector("[data-testid='product-card']")).size() >= 11);
@@ -35,17 +28,22 @@ public class ProductLoadingTest extends ShopFlakeBaseTest {
                 .isBetween(11, 12);
     }
 
-    /**
-     * 🟡 FLAKY: Status bar may still say "Fetching" when API takes > 700ms
-     * With a random 0–1500ms delay, a 700ms sleep gives ~50% chance of catching
-     * the "Loaded" text before assertion — creating genuine flakiness.
-     */
+    @Test
+    public void flakyProductCountTest() {
+        navigate("/");
+        List<WebElement> cards = driver.findElements(By.cssSelector("[data-testid='product-card']"));
+
+        // ❌ Problem: Direct assertion on a count that flips randomly in the backend
+        assertThat(cards.size())
+                .as("Product grid should have exactly 12 products")
+                .isEqualTo(12);
+    }
+
     @Test
     public void footerCopyrightAlwaysPresent() throws InterruptedException {
         navigate("/");
 
-        // ✅ FIXED: Replaced arbitrary sleep with an explicit wait for the text to
-        // appear
+        // 🟢 REAL TEST (STABLE): Explicit wait for the text to appear
         org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(driver,
                 java.time.Duration.ofSeconds(10));
         wait.until(org.openqa.selenium.support.ui.ExpectedConditions
@@ -59,10 +57,37 @@ public class ProductLoadingTest extends ShopFlakeBaseTest {
                 .contains("Loaded");
     }
 
-    /**
-     * 🟢 STABLE: Navigation elements are always present
-     * These don't depend on async data.
+    /*
+     * // 🟠 FLAKY TEST EXAMPLE: Async Loading Race
+     * // Uses a hard sleep that isn't long enough for the random backend delay
+     * (0-1500ms).
+     * 
+     * @Test
+     * public void flakyStatusTextTest() throws InterruptedException {
+     * navigate("/");
+     * 
+     * // ❌ Problem: Hard-coded sleep of 500ms will fail if backend takes > 500ms
+     * Thread.sleep(500);
+     * 
+     * WebElement statusBar = driver.findElement(By.id("status-bar"));
+     * assertThat(statusBar.getText()).contains("Loaded"); // RCA: Async Load (⚡)
+     * }
      */
+
+    /*
+     * // 🔴 BROKEN TEST EXAMPLE (Consistently Fails)
+     * // Looking for an ID that doesn't exist.
+     * 
+     * @Test
+     * public void consistentlyBrokenTest() {
+     * navigate("/");
+     * 
+     * // ❌ Problem: ID 'non-existent-header' does not exist in any run.
+     * driver.findElement(By.id("non-existent-header")).isDisplayed(); // RCA: 0%
+     * Entropy (Safe Bug)
+     * }
+     */
+
     @Test
     public void navigationBarVisible() {
         navigate("/");
@@ -74,20 +99,13 @@ public class ProductLoadingTest extends ShopFlakeBaseTest {
         assertThat(cartLink.isDisplayed()).isTrue();
     }
 
-    /**
-     * 🟡 FLAKY: At least one product has stock status that randomly flips
-     * The first product card's stock badge changes between in-stock/out-of-stock.
-     */
     @Test
     public void checkProductPricesDefined() {
         navigate("/");
 
-        // Wait for product card to load naturally
         WebElement firstCard = waitForElement(By.id("product-1"));
         String stockText = firstCard.findElement(By.cssSelector(".stock-badge")).getText();
 
-        // ✅ FIXED: If the API randomly assigns 'Out of Stock' to this element, skip the
-        // test
         if (stockText.contains("Out of Stock")) {
             throw new org.testng.SkipException("Product 1 was randomly assigned Out of Stock, skipping test");
         }
@@ -97,16 +115,12 @@ public class ProductLoadingTest extends ShopFlakeBaseTest {
                 .contains("In Stock");
     }
 
-    /**
-     * 🟡 FLAKY: Add-to-cart button state depends on stock which flips randomly
-     */
     @Test
     public void addToCartButtonEnabled() {
         navigate("/");
 
         WebElement addBtn = waitForElement(By.id("add-btn-1"));
 
-        // ✅ FIXED: If out of stock, the button evaluates as disabled, so skip.
         if (addBtn.getAttribute("disabled") != null) {
             throw new org.testng.SkipException("Product 1 is randomly Out of Stock, skip test");
         }
