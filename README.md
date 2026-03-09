@@ -111,16 +111,23 @@ Add this property to your `maven-surefire-plugin` configuration:
 </plugin>
 ```
 
-### 4. Run the Detector
-Navigate to your project's root directory (where the `pom.xml` lives) and run the detector. Specify how many times you want the suite to run to calculate entropy.
+### 4. Run the Detector on Your Project
+Run the `selenium-flaky-detect` command. 
 
+If your terminal is already inside your Java project (where `pom.xml` lives):
 ```bash
-# General Usage (Runs tests 3 times by default)
+# Run 3 times by default
 selenium-flaky-detect --project .
+```
 
-# Run 5 times for higher confidence
-selenium-flaky-detect --project . --runs 5
+If your terminal is somewhere else, you can provide the **absolute path** to your Java project:
+```bash
+# Point directly to any Maven project on your machine
+selenium-flaky-detect --project /Users/mvsaran/my-java-app --runs 5
+```
 
+If you only want to analyze a specific subset of test classes (to save time):
+```bash
 # Filter specific test classes using Surefire's -Dtest format
 selenium-flaky-detect --project . --runs 3 --spec "LoginTest,CheckoutTest"
 ```
