@@ -72,6 +72,13 @@ By focusing on entropy, we ignore "consistently broken" tests (which are just re
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
+### 🧩 Understanding the Layers
+
+*   **Layer 1: Orchestration & Simulation.** Handles the CLI orchestrator to launch tests. For the built-in demo, this simulates a real-world project by spinning up the intentionally-flaky "ShopFlake" Spring Boot container and dispatching the Maven runner against it.
+*   **Layer 2: Test Execution Loop.** Executes your Selenium test suite multiple times (`N` repeats) to gather a reliable sample size. It continuously parses the generated `Surefire XML` reports, capturing every failure trace, error message, and test duration.
+*   **Layer 3: Intelligence & Scoring.** The brain of the detector. The **Entropy Scorer** mathematically calculates a test's exact `Flakiness Percentage` (0–100%) and generates a global `Suite Health Score`. Next, the **Root Cause Analyzer** scans the failed Java stack traces, pattern-matching against known Selenium exceptions to categorize exactly *why* it failed (e.g., `StaleElementReferenceException`). 
+*   **Layer 4: Actionable Reporting.** Translates the raw data into an interactive HTML dashboard. Recommends specific, AI-driven Java/Selenium code fixes (e.g., *“Add explicit wait here”*) based on the identified root cause. Optionally acts as a **CI Trust Gate** to aggressively block builds if flaky tests cross a configured threshold.
+
 ---
 
 ## 🚀 Step-by-Step Guide
