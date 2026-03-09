@@ -1,6 +1,6 @@
 {
   "name": "selenium-flaky-detector",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "🔍 Detect, score, and fix flaky Selenium/Java tests using entropy-based analysis, root-cause diagnosis, and a premium HTML dashboard.",
   "author": "mvsaran",
   "license": "MIT",

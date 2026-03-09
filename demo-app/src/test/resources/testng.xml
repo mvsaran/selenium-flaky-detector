@@ -2,6 +2,7 @@
 <suite name="ShopFlake Test Suite" verbose="1">
     <test name="AllTests">
         <classes>
+      <class name="io.shopflake.tests.ShowcaseFlakyReportTest"/>
       <class name="io.shopflake.tests.StableControlTest"/>
       <class name="io.shopflake.tests.ProductLoadingTest"/>
       <class name="io.shopflake.tests.CartFunctionalityTest"/>
